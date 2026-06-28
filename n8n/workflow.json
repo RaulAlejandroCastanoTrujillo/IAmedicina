@@ -1,0 +1,389 @@
+{
+  "name": "PROYECTO FINAL | Consulta Médica SOAP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consulta-medica",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "fe9b77a6-a39c-44ba-831e-e888ec0a5d4b",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "audio",
+        "options": {
+          "language": "es"
+        }
+      },
+      "id": "node-whisper",
+      "name": "Transcribir Audio (Whisper)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "putxKbBzpHKlN9dd",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres un asistente médico especializado en Colombia. Tu tarea es convertir la transcripción de una consulta médica en una nota clínica estructurada en formato SOAP, siguiendo la Resolución 1995 de 1999 del Ministerio de Salud de Colombia.\n\nDevuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin texto adicional ni bloques de código markdown:\n{\n  \"paciente\": \"\",\n  \"fecha\": \"\",\n  \"subjetivo\": {\n    \"motivo_consulta\": \"\",\n    \"enfermedad_actual\": \"\",\n    \"antecedentes\": \"\"\n  },\n  \"objetivo\": {\n    \"signos_vitales\": \"\",\n    \"examen_fisico\": \"\"\n  },\n  \"analisis\": {\n    \"diagnostico\": \"\",\n    \"codigo_cie10\": \"\"\n  },\n  \"plan\": {\n    \"tratamiento\": \"\",\n    \"medicamentos\": \"\",\n    \"recomendaciones\": \"\",\n    \"proxima_cita\": \"\"\n  },\n  \"remision\": {\n    \"aplica\": false,\n    \"examenes_sugeridos\": \"\",\n    \"especialidad_sugerida\": \"\"\n  }\n}\n\nREGLA GENERAL: intenta llenar TODOS los campos. Solo usa \"No registrado\" como último recurso, cuando sea imposible inferir algo razonable.\n\nReglas para \"codigo_cie10\":\n- SIEMPRE asigna un código CIE-10, incluso si el diagnóstico es incierto o hay diagnóstico diferencial (usa el código del diagnóstico principal o más probable).\n- Si no hay ninguna información clínica que permita inferir un diagnóstico, usa \"R69\" (causa desconocida y no especificada de morbilidad).\n- Nunca lo dejes en blanco salvo que \"diagnostico\" también esté vacío.\n\nReglas para \"objetivo\" (signos_vitales, examen_fisico):\n- Si el médico menciona algunos signos vitales o hallazgos pero no todos, registra los que sí menciona y deja constancia de cuáles faltan (ej: \"FC 88, TA no registrada\").\n- Si no menciona NADA de examen físico, escribe una frase breve y genérica coherente con los síntomas descritos, marcándola como sugerida, ej: \"(sugerido) Paciente afebril, sin hallazgos relevantes adicionales reportados\".\n\nReglas para \"plan\" (tratamiento, medicamentos, recomendaciones, proxima_cita):\n- Si el médico ordenó estudios adicionales (ej: dimero D, ecografía doppler, laboratorios) ANTES de definir tratamiento o medicación definitiva, eso es válido y normal: registra esos estudios en \"recomendaciones\", y en \"tratamiento\"/\"medicamentos\" indica el manejo sintomático inicial mientras se confirma el diagnóstico (ej: \"(sugerido) Manejo sintomático con acetaminofén si hay dolor, evitar antiinflamatorios hasta descartar diagnóstico diferencial\"). NO dejes \"medicamentos\" como \"No registrado\" solo porque el médico fue cauteloso con la medicación definitiva.\n- Si el médico dictó explícitamente el tratamiento/medicamentos/recomendaciones/próxima cita, transcríbelos tal cual.\n- Si el médico NO los menciona en absoluto, infiere un plan clínicamente razonable y conservador, coherente con el diagnóstico, y antepón \"(sugerido) \" al inicio del texto.\n- Para \"proxima_cita\", si no se menciona, sugiere un plazo razonable según la gravedad y los estudios pendientes (ej: \"(sugerido) Control en 48-72 horas con resultados de ecografía doppler\").\n- Nunca dejes estos 4 campos como \"No registrado\" salvo que el diagnóstico mismo sea \"No registrado\".\n\nReglas para \"remision\":\n- El mensaje del usuario incluirá la línea \"Solicitar recomendaciones de remisión: SI\" o \"Solicitar recomendaciones de remisión: NO\". Usa ESE valor exacto para decidir el campo \"aplica\" (true si dice SI, false si dice NO). No actives esta sección por tu cuenta si no fue solicitada explícitamente.\n- Si aplica=true: en \"examenes_sugeridos\" enumera de forma breve y concreta los exámenes o estudios complementarios razonables según los síntomas y el diagnóstico (ej: \"(sugerido) Hemograma completo, radiografía de tórax\"). En \"especialidad_sugerida\" indica UNA sola especialidad médica razonable para remitir al paciente (ej: \"(sugerido) Medicina Interna\"). Antepón siempre \"(sugerido)\" porque es una sugerencia de la IA, no una orden médica definitiva: el médico tratante es quien decide si remite o no.\n- Si aplica=false: deja \"examenes_sugeridos\" y \"especialidad_sugerida\" como cadenas vacías \"\".\n\nCompleta el resto de campos (paciente, fecha, subjetivo) con la información literal de la transcripción. Si genuinamente no hay paciente o motivo de consulta, ahí sí usa \"No registrado\"."
+            },
+            {
+              "content": "=Paciente: {{ $('Webhook').item.json.body.paciente }}\nFecha: {{ new Date().toLocaleDateString('es-CO', {year: 'numeric', month: 'long', day: 'numeric'}) }}\nSolicitar recomendaciones de remisión: {{ $('Webhook').item.json.body.remision === 'true' ? 'SI' : 'NO' }}\n\nTranscripción de la consulta:\n{{ $json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "node-gpt4o",
+      "name": "Generar Nota SOAP (GPT-4o)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "putxKbBzpHKlN9dd",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.item.json;\nconst content = j.content || j.output_text || j.message?.content || j.text || (Array.isArray(j.output) ? j.output.map(o => o.content?.[0]?.text || '').join('') : '') || '';\n\nlet notaSOAP;\ntry {\n  const cleaned = String(content).replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  notaSOAP = JSON.parse(cleaned);\n} catch (e) {\n  notaSOAP = { error: 'No se pudo estructurar la nota', transcripcion_raw: content };\n}\n\n// Asegura que 'remision' siempre exista con una forma válida, aunque el modelo la omita\nif (!notaSOAP.remision || typeof notaSOAP.remision !== 'object') {\n  notaSOAP.remision = { aplica: false, examenes_sugeridos: '', especialidad_sugerida: '' };\n}\n\n// Metadatos de la consulta: id único (para historial/decisión médica) y fecha de creación\nconst body = $('Webhook').item.json.body || {};\nnotaSOAP.id = body.id || (Date.now() + '-' + Math.random().toString(36).slice(2, 8));\nnotaSOAP._creadoEn = new Date().toISOString();\n\nreturn { json: notaSOAP };"
+      },
+      "id": "node-code",
+      "name": "Formatear JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dir = '/data/historial';\ntry { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}\n\nconst data = $input.item.json;\nconst filePath = path.join(dir, `${data.id}.json`);\n\ntry {\n  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');\n} catch (e) {\n  data._guardadoError = e.message;\n}\n\nreturn { json: data };"
+      },
+      "id": "node-guardar-historial",
+      "name": "Guardar Historial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1068,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "node-respond",
+      "name": "Responder al Frontend",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "historial-listar",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook-listar",
+      "name": "Webhook Listar Historial",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        320
+      ],
+      "webhookId": "a1b2c3d4-1111-44ba-831e-e888ec0a5d4b",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst dir = '/data/historial';\n\nlet registros = [];\ntry {\n  const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));\n  registros = files.map(f => {\n    try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf-8')); }\n    catch (e) { return null; }\n  }).filter(Boolean);\n} catch (e) {\n  registros = [];\n}\n\nregistros.sort((a, b) => new Date(b._creadoEn || 0) - new Date(a._creadoEn || 0));\n\nreturn { json: { registros } };"
+      },
+      "id": "node-leer-historial",
+      "name": "Leer Historial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "node-respond-listar",
+      "name": "Responder Historial",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "historial-decision",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook-decision",
+      "name": "Webhook Decision Remision",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        560
+      ],
+      "webhookId": "a1b2c3d4-2222-44ba-831e-e888ec0a5d4b",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\nconst dir = '/data/historial';\n\nconst body = $input.item.json.body || {};\nconst id = body.id;\n\nif (!id) {\n  return { json: { error: 'Falta el id de la consulta' } };\n}\n\nconst filePath = path.join(dir, `${id}.json`);\nlet data;\ntry {\n  data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n} catch (e) {\n  return { json: { error: 'No se encontró la consulta con ese id' } };\n}\n\ndata.remision = data.remision || { aplica: false, examenes_sugeridos: '', especialidad_sugerida: '' };\ndata.remision.decision_medica = {\n  estado: body.estado || 'pendiente',\n  especialidad_final: body.especialidad_final || data.remision.especialidad_sugerida || '',\n  observacion: body.observacion || '',\n  decididoEn: new Date().toISOString()\n};\n\ntry {\n  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');\n} catch (e) {\n  data._guardadoError = e.message;\n}\n\nreturn { json: data };"
+      },
+      "id": "node-actualizar-decision",
+      "name": "Actualizar Decision Remision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "node-respond-decision",
+      "name": "Responder Decision",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        560
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Transcribir Audio (Whisper)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribir Audio (Whisper)": {
+      "main": [
+        [
+          {
+            "node": "Generar Nota SOAP (GPT-4o)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Nota SOAP (GPT-4o)": {
+      "main": [
+        [
+          {
+            "node": "Formatear JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear JSON": {
+      "main": [
+        [
+          {
+            "node": "Guardar Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Historial": {
+      "main": [
+        [
+          {
+            "node": "Responder al Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Listar Historial": {
+      "main": [
+        [
+          {
+            "node": "Leer Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Historial": {
+      "main": [
+        [
+          {
+            "node": "Responder Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Decision Remision": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Decision Remision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Decision Remision": {
+      "main": [
+        [
+          {
+            "node": "Responder Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dd8f0eab-2227-4bae-b3e6-6f7a93914f09",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "067d516c4ed44e2dac81a52cfb0ee88115d3041b78ab84ed97fa9ed3750f6224"
+  },
+  "nodeGroups": [],
+  "id": "cW9xR2saDpI3IRg1",
+  "tags": []
+}

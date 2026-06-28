@@ -1,0 +1,60 @@
+# ============================================================
+# Health AI / MediScribe — Docker Compose
+#
+# Levanta dos contenedores:
+#   - n8n:  motor de automatización con el workflow SOAP ya
+#           importado y activado (usando tu OPENAI_API_KEY)
+#   - app:  la página Health AI servida con nginx
+#
+# Uso:
+#   1. cp .env.example .env
+#   2. Edita .env y pon tu OPENAI_API_KEY
+#   3. docker compose up -d --build
+#   4. Abre http://localhost:8080
+# ============================================================
+services:
+
+  n8n:
+    build:
+      context: ./n8n
+    container_name: healthai-n8n
+    restart: unless-stopped
+    ports:
+      - "5679:5678"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-healthai-dev-encryption-key-cambia-esto}
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678/}
+      - GENERIC_TIMEZONE=America/Bogota
+      - TZ=America/Bogota
+      # Permite que los nodos "Code" usen los módulos fs/path de Node.js,
+      # necesarios para guardar el historial clínico en disco.
+      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - historial_data:/data/historial
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:5678/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  app:
+    build:
+      context: .
+    container_name: healthai-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - N8N_PUBLIC_URL=${N8N_PUBLIC_URL:-http://localhost:5678}
+    depends_on:
+      - n8n
+
+volumes:
+  n8n_data:
+  historial_data:

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health AI — Plataforma Médica Inteligente</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Toggle móvil -->
+<button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">⚕️</div>
+      <div class="logo-text">
+        <span>Health AI</span>
+        <span>Plataforma Médica</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menú principal</div>
+
+    <div class="nav-item active" data-section="sec-home">
+      <span class="nav-icon">🏠</span>
+      Inicio
+    </div>
+
+    <div class="nav-section-label" style="margin-top:0.5rem">Herramientas</div>
+
+    <div class="nav-item" data-section="sec-mediscribe">
+      <span class="nav-icon">🎙️</span>
+      MediScribe
+      <span class="badge">IA</span>
+    </div>
+
+    <div class="nav-item" data-section="sec-historial">
+      <span class="nav-icon">📋</span>
+      Historial Clínico
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">RC</div>
+      <div class="user-info">
+        <span>Dr. RACT</span>
+        <span>Medicina General</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Inicio</div>
+      <div class="topbar-subtitle" id="topbar-sub">Panel principal de Health AI</div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot">
+        <div class="dot" id="status-dot"></div>
+        <span id="status-label">Verificando...</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- ════════════════════════════════════════
+         SECCIÓN: HOME
+    ════════════════════════════════════════════ -->
+    <section id="sec-home" class="section">
+
+      <!-- Bienvenida -->
+      <div style="margin-bottom:2rem">
+        <h2 style="font-size:1.5rem;font-weight:800;color:var(--text-dark);letter-spacing:-0.5px">
+          Bienvenido a Health AI 👋
+        </h2>
+        <p style="color:var(--text-medium);margin-top:0.4rem;font-size:0.9rem" id="current-date"></p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon blue">🩺</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-consultas">0</div>
+            <div class="stat-label">Consultas hoy</div>
+            <div class="stat-trend">↑ En tiempo real</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon teal">📝</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-notas">0</div>
+            <div class="stat-label">Notas SOAP generadas</div>
+            <div class="stat-trend">↑ Acumulado</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">⏱️</div>
+          <div class="stat-info">
+            <div class="stat-value">~30s</div>
+            <div class="stat-label">Tiempo promedio</div>
+            <div class="stat-trend">Por nota generada</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon indigo">🎯</div>
+          <div class="stat-info">
+            <div class="stat-value">CIE-10</div>
+            <div class="stat-label">Codificación</div>
+            <div class="stat-trend">Res. 1995/1999</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Herramientas disponibles -->
+      <div style="margin-bottom:1rem">
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text-medium);text-transform:uppercase;letter-spacing:1px">
+          Herramientas disponibles
+        </h3>
+      </div>
+
+      <div class="grid-2">
+        <!-- MediScribe -->
+        <div class="tool-card" onclick="navigateTo('sec-mediscribe')">
+          <div class="tool-card-icon">🎙️</div>
+          <h3>MediScribe</h3>
+          <p>Graba la conversación de la consulta médica y genera automáticamente una nota clínica en formato SOAP, codificada según la Resolución 1995 de 1999.</p>
+          <div class="tool-card-footer">
+            <span class="tool-tag active-tag">✓ Activo</span>
+            <span class="tool-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="tool-card" onclick="navigateTo('sec-historial')">
+          <div class="tool-card-icon" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">📋</div>
+          <h3>Historial Clínico</h3>
+          <p>Consulta y revisa todas las notas SOAP generadas. Filtra por paciente, fecha o diagnóstico. Las notas se almacenan localmente en tu navegador.</p>
+          <div class="tool-card-footer">
+            <span class="tool-tag active-tag">✓ Disponible</span>
+            <span class="tool-arrow">→</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info normativa -->
+      <div class="card mt-3" style="background:linear-gradient(135deg,#E3F2FD,#EBF5FB);border-color:var(--border)">
+        <div style="display:flex;gap:1rem;align-items:flex-start">
+          <div style="font-size:1.5rem;flex-shrink:0">⚖️</div>
+          <div>
+            <div style="font-size:0.9rem;font-weight:700;color:var(--primary-dark);margin-bottom:0.4rem">Marco normativo colombiano</div>
+            <p style="font-size:0.83rem;color:var(--text-medium);line-height:1.6">
+              Health AI genera notas clínicas siguiendo la <strong>Resolución 1995 de 1999</strong> del Ministerio de Salud (estructura SOAP obligatoria) y la <strong>Resolución 1888 de 2025</strong> para historia clínica digital interoperable, vigente desde abril de 2026.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ════════════════════════════════════════
+         SECCIÓN: MEDISCRIBE
+    ════════════════════════════════════════════ -->
+    <section id="sec-mediscribe" class="section">
+
+      <div class="page-header page-header-row">
+        <div>
+          <h2>MediScribe</h2>
+          <p>Graba la consulta → transcripción automática → nota SOAP</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--text-light)">
+          <span>🤖 Whisper + GPT-4o</span>
+          <span>·</span>
+          <span>Res. 1995/1999</span>
+        </div>
+      </div>
+
+      <!-- Área principal de grabación -->
+      <div id="ms-form-area">
+        <div class="grid-2" style="align-items:start;gap:1.5rem">
+
+          <!-- Panel izquierdo: datos + grabación -->
+          <div>
+            <div class="card mb-2">
+              <div class="card-header">
+                <span class="card-title">Datos de la consulta</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nombre del paciente *</label>
+                <input type="text" class="form-input" id="ms-paciente"
+                  placeholder="Ej: María González Pérez">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Médico tratante</label>
+                <input type="text" class="form-input" id="ms-medico"
+                  placeholder="Ej: Dr. Raúl Castaño">
+              </div>
+
+              <label class="remision-toggle-label" for="ms-remision-toggle">
+                <input type="checkbox" id="ms-remision-toggle">
+                <span>🏥 Recomendaciones para remisión <span class="text-muted text-sm">(la IA sugiere exámenes y especialidad)</span></span>
+              </label>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Audio de la consulta</span>
+              </div>
+
+              <!-- Selector de modo: grabar vs subir archivo -->
+              <div class="input-mode-toggle" id="ms-mode-toggle">
+                <button class="mode-btn active" id="mode-btn-record" onclick="switchInputMode('record')">
+                  🎙️ Grabar en vivo
+                </button>
+                <button class="mode-btn" id="mode-btn-upload" onclick="switchInputMode('upload')">
+                  📁 Subir archivo
+                </button>
+              </div>
+
+              <!-- Modo: grabación en vivo -->
+              <div id="ms-record-panel">
+                <div class="recorder-wrapper">
+                  <div class="rec-timer" id="ms-timer"></div>
+
+                  <button class="mic-btn idle" id="ms-mic-btn" onclick="toggleGrabacion()">
+                    🎙️
+                  </button>
+
+                  <div class="rec-status" id="ms-rec-status">
+                    Presiona el botón para iniciar la grabación
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modo: subir archivo -->
+              <div id="ms-upload-panel" style="display:none">
+                <label class="upload-dropzone" id="ms-dropzone" for="ms-file-input">
+                  <div class="upload-icon">📁</div>
+                  <div class="upload-text">Haz clic o arrastra un archivo de audio</div>
+                  <div class="upload-hint">Formatos soportados: M4A, MP3, WAV, OGG, WEBM</div>
+                  <input type="file" id="ms-file-input"
+                    accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.mp4"
+                    style="display:none" onchange="handleFileUpload(event)">
+                </label>
+              </div>
+
+              <div class="audio-preview" id="ms-audio-preview">
+                <audio id="ms-audio-player" controls></audio>
+                <button class="btn btn-primary btn-lg btn-full mt-2" onclick="enviarConsulta()">
+                  ⚡ Generar Nota SOAP
+                </button>
+                <button class="btn btn-outline btn-full mt-1" onclick="nuevaConsulta()">
+                  🔄 Nueva grabación / archivo
+                </button>
+              </div>
+
+              <div class="alert alert-error" id="ms-alert"></div>
+            </div>
+          </div>
+
+          <!-- Panel derecho: instrucciones -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">¿Cómo funciona?</span>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:1.2rem">
+
+                <div style="display:flex;gap:0.8rem;align-items:flex-start">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--border-light);color:var(--primary);font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+                  <div>
+                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark)">Ingresa los datos</div>
+                    <div style="font-size:0.82rem;color:var(--text-medium);margin-top:2px">Nombre del paciente y médico tratante.</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:0.8rem;align-items:flex-start">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--border-light);color:var(--primary);font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+                  <div>
+                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark)">Graba la consulta</div>
+                    <div style="font-size:0.82rem;color:var(--text-medium);margin-top:2px">Habla con naturalidad. Describe síntomas, antecedentes, examen físico y plan.</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:0.8rem;align-items:flex-start">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--border-light);color:var(--primary);font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+                  <div>
+                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark)">Genera la nota SOAP</div>
+                    <div style="font-size:0.82rem;color:var(--text-medium);margin-top:2px">Whisper transcribe el audio. GPT-4o estructura la nota clínica con CIE-10.</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:0.8rem;align-items:flex-start">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--border-light);color:var(--primary);font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div>
+                  <div>
+                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark)">Revisa y guarda</div>
+                    <div style="font-size:0.82rem;color:var(--text-medium);margin-top:2px">La nota queda guardada automáticamente en el Historial Clínico.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-info mt-2" style="display:block;margin-top:1.2rem">
+                💡 <strong>Tip:</strong> Menciona signos vitales, antecedentes y alergias durante la grabación para una nota más completa.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="card loading-box" id="ms-loading">
+        <div class="spinner"></div>
+        <div class="loading-text" id="ms-loading-text">Enviando audio al servidor...</div>
+        <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.5rem">
+          El proceso tarda entre 20 y 45 segundos
+        </p>
+      </div>
+
+      <!-- Resultado SOAP -->
+      <div id="ms-resultado" style="display:none;animation:fadeIn 0.3s ease">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem">
+          <h3 style="font-size:1rem;font-weight:700;color:var(--text-dark)">Nota Clínica Generada</h3>
+          <div class="flex gap-1">
+            <button class="btn btn-outline" onclick="downloadFHIR()">
+              ⬇️ Descargar FHIR (.json)
+            </button>
+            <button class="btn btn-outline" onclick="nuevaConsulta()">🔄 Nueva consulta</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="display:block;margin-bottom:1rem">
+          🔗 Esta nota puede exportarse como <strong>HL7 FHIR R4</strong> — el estándar de interoperabilidad usado por la Resolución 1888 de 2025 para el Resumen Digital de Atención (RDA).
+        </div>
+
+        <div class="soap-header">
+          <div>
+            <h3 id="res-paciente">—</h3>
+            <span style="font-size:0.8rem;opacity:0.7">Médico: <span id="res-medico">—</span></span>
+          </div>
+          <span id="res-fecha">—</span>
+        </div>
+
+        <div class="soap-grid">
+
+          <div class="soap-block s">
+            <div class="soap-block-label">S — Subjetivo</div>
+            <div class="soap-field">
+              <div class="soap-field-key">Motivo de consulta</div>
+              <div class="soap-field-val" id="res-motivo">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Enfermedad actual</div>
+              <div class="soap-field-val" id="res-enfermedad">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Antecedentes</div>
+              <div class="soap-field-val" id="res-antecedentes">—</div>
+            </div>
+          </div>
+
+          <div class="soap-block o">
+            <div class="soap-block-label">O — Objetivo</div>
+            <div class="soap-field">
+              <div class="soap-field-key">Signos vitales</div>
+              <div class="soap-field-val" id="res-signos">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Examen físico</div>
+              <div class="soap-field-val" id="res-examen">—</div>
+            </div>
+          </div>
+
+          <div class="soap-block a">
+            <div class="soap-block-label">A — Análisis</div>
+            <div class="soap-field">
+              <div class="soap-field-key">Diagnóstico</div>
+              <div class="soap-field-val" id="res-diagnostico">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Código CIE-10</div>
+              <div class="soap-field-val" id="res-cie10">—</div>
+              <span class="cie10-badge" id="res-cie10-badge"></span>
+              <div class="cie10-desc" id="res-cie10-desc"></div>
+            </div>
+          </div>
+
+          <div class="soap-block p">
+            <div class="soap-block-label">P — Plan</div>
+            <div class="soap-field">
+              <div class="soap-field-key">Tratamiento</div>
+              <div class="soap-field-val" id="res-tratamiento">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Medicamentos</div>
+              <div class="soap-field-val" id="res-medicamentos">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Recomendaciones</div>
+              <div class="soap-field-val" id="res-recomendaciones">—</div>
+            </div>
+            <div class="soap-field">
+              <div class="soap-field-key">Próxima cita</div>
+              <div class="soap-field-val" id="res-proxima">—</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bloque de remisión a especialista (solo si se solicitó) -->
+        <div class="card mt-2" id="res-remision-block" style="display:none">
+          <div class="card-header">
+            <span class="card-title">🏥 Remisión a especialista (sugerida por IA)</span>
+          </div>
+
+          <div class="soap-field">
+            <div class="soap-field-key">Exámenes sugeridos</div>
+            <div class="soap-field-val" id="res-remision-examenes">—</div>
+          </div>
+          <div class="soap-field">
+            <div class="soap-field-key">Especialidad sugerida por la IA</div>
+            <div class="soap-field-val" id="res-remision-especialidad">—</div>
+          </div>
+
+          <div class="alert alert-info" style="display:block;margin:0.8rem 0">
+            ⚠️ Esto es una sugerencia de la IA, no una orden médica. La decisión final de remitir o no la toma el médico tratante.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Decisión del médico</label>
+            <select class="form-input" id="ms-remision-decision">
+              <option value="pendiente">Pendiente</option>
+              <option value="remitir">Remitir</option>
+              <option value="no_remitir">No remitir</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Especialidad final (editable)</label>
+            <input type="text" class="form-input" id="ms-remision-especialidad-final">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observación (opcional)</label>
+            <input type="text" class="form-input" id="ms-remision-observacion"
+              placeholder="Ej: paciente prefiere control ambulatorio primero">
+          </div>
+
+          <button class="btn btn-primary" onclick="guardarDecisionRemision()">💾 Guardar decisión</button>
+          <div class="alert alert-info" id="ms-remision-guardado" style="display:none;margin-top:0.6rem">
+            ✅ Decisión guardada en el historial clínico.
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ════════════════════════════════════════
+         SECCIÓN: HISTORIAL CLÍNICO
+    ════════════════════════════════════════════ -->
+    <section id="sec-historial" class="section">
+
+      <div class="page-header page-header-row">
+        <div>
+          <h2>Historial Clínico</h2>
+          <p>Notas SOAP generadas con MediScribe</p>
+        </div>
+        <button class="btn btn-primary" onclick="navigateTo('sec-mediscribe')">
+          + Nueva consulta
+        </button>
+      </div>
+
+      <!-- Lista de registros -->
+      <div id="hist-lista">
+        <div class="card empty-state" id="hist-empty">
+          <div class="empty-icon">📋</div>
+          <h3>Sin registros aún</h3>
+          <p>Las notas SOAP que generes con MediScribe aparecerán aquí automáticamente. Comienza grabando tu primera consulta.</p>
+          <button class="btn btn-primary mt-2" onclick="navigateTo('sec-mediscribe')">
+            🎙️ Ir a MediScribe
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- /page-content -->
+</main><!-- /main-content -->
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/mediscribe.js"></script>
+<script>
+  // Actualizar stats desde historial
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      const hist = JSON.parse(localStorage.getItem('healthai_historial') || '[]');
+      const hoy  = new Date().toDateString();
+      const consultas = hist.filter(h => new Date(h._ts).toDateString() === hoy).length;
+      document.getElementById('stat-consultas').textContent = consultas;
+      document.getElementById('stat-notas').textContent     = hist.length;
+    } catch(_) {}
+    renderHistorial();
+  });
+</script>
+
+</body>
+</html>
